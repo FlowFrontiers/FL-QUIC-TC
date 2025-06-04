@@ -1,0 +1,9 @@
+{
+    "discord": 0,
+    "facebook-graph": 1,
+    "google-www": 2,
+    "instagram": 3,
+    "snapchat": 4,
+    "spotify": 5,
+    "youtube": 6
+}
