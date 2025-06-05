@@ -1,0 +1,13 @@
+                precision    recall  f1-score   support
+
+     instagram       0.96      0.96      0.96    154351
+       spotify       0.99      0.99      0.99    356370
+       youtube       0.95      0.93      0.94    352986
+    google-www       0.95      0.97      0.96    490930
+facebook-graph       0.94      0.94      0.94    109363
+      snapchat       0.97      0.95      0.96     64286
+       discord       1.00      1.00      1.00     79455
+
+      accuracy                           0.96   1607741
+     macro avg       0.97      0.96      0.96   1607741
+  weighted avg       0.96      0.96      0.96   1607741

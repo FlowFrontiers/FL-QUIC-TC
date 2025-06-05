@@ -1,0 +1,10 @@
+{
+    "epochs": 10,
+    "batch_size": 1024,
+    "learning_rate": 0.01,
+    "early_stopping_patience": 5,
+    "learnable_parameters": 2337304,
+    "scenario_name": "FC-All",
+    "device": "mps",
+    "random_state": 123
+}
