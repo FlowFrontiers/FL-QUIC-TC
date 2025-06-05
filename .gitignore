@@ -1,5 +1,13 @@
-cesnet-quic22
 __pycache__
 .DS_Store
-datasets/
-results/global_real/
+
+datasets/0-cesnet-quic22/*
+datasets/1-filtered/*
+datasets/2-eval/*
+datasets/3-features/*
+datasets/4-dataset/*
+datasets/5-federated/*
+
+
+results/global_models/*
+prefixes-orgs.csv

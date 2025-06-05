@@ -1,15 +1,12 @@
-import sys, os, json, math
-from os.path import join as path
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../../")))
-from configuration import Configuration
+import os, json, math, torch
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import torch
-from federated_clients import (
-    set_parameters
-)
+
+from os.path import join as path
+from configuration import Configuration
+from federated_clients import set_parameters
 
 cluster_A = [
     "client-1",
@@ -60,7 +57,7 @@ class MetricsTracker():
         self.figs()
     
     def save_model_global_real(self, model, round):
-        path_model = path(self.c.path_results, "global_real", self.distribution_case, self.aggregation_algo)
+        path_model = path(self.c.path_results, "global_model", self.distribution_case, self.aggregation_algo)
         os.makedirs(path_model, exist_ok=True)
         torch.save(model.state_dict(), path(path_model, f"model-{round}.torch"))
         
@@ -77,7 +74,7 @@ class MetricsTracker():
             self.metrics = json.load(f)
     
     def load_cl(self):
-        with open(path(self.c.path_results, "CL", "metrics.json"), 'r') as f:
+        with open(path(self.c.path_results, "scenarios", "CL", "FC-All", "metrics.json"), 'r') as f:
             json_data = json.load(f)
             self.cl["Loss"] = json_data["best_val_loss"]
             self.cl["Accuracy"] = json_data["test_acc"]
@@ -85,7 +82,7 @@ class MetricsTracker():
             self.cl["Recall"] = json_data["test_recall"]
             self.cl["Precision"] = json_data["test_precision"]
     
-    def figs_thesis(self, dataset):
+    def figs_client_group(self, dataset):
         plt.figure(figsize=(14, 8))
         sns.set_theme(style="whitegrid")
         plt.rcParams['font.family'] = 'CMU Serif'
@@ -213,14 +210,16 @@ def figs_overall_scenario(scenario):
     plt.rcParams['font.size'] = '14'
     c = Configuration()
     
+    # Load Central model metrics
     metrics_cl = {}
-    with open(path(c.path_results, "CL", "metrics.json"), 'r') as f:
+    with open(path(c.path_results, "scenarios", "CL", "FC-All", "metrics.json"), 'r') as f:
         json_data = json.load(f)
         metrics_cl["Loss"] = json_data["best_val_loss"]
         metrics_cl["Accuracy"] = json_data["test_acc"]
         metrics_cl["F1-Score"] = json_data["test_f1"]
         metrics_cl["Recall"] = json_data["test_recall"]
         metrics_cl["Precision"] = json_data["test_precision"]
+    
     
     
     path_case = path(c.path_results, "scenarios", scenario)
@@ -230,6 +229,7 @@ def figs_overall_scenario(scenario):
     for metric in ["Accuracy", "F1-Score", "Recall", "Precision"]:
         y_min = 1
         plt.axhline(y=metrics_cl[metric], color='r', linestyle='--', label='CL')
+        
         
         colors = ["red", "blue", "green", "orange", "purple"]
         ci = 0 # color index
@@ -248,11 +248,9 @@ def figs_overall_scenario(scenario):
         
         y_min = math.floor(y_min*100)/100
         _add_night_rectangles()
-        plt.ylim(y_min, 1)  # Set y-axis between 0 and 1
+        plt.ylim(y_min, 1)
         plt.xticks(np.arange(4, c.rounds+1, 4), rotation=0)
         plt.yticks(np.arange(y_min, 1.0, 0.05))
-        #plt.xlabel("Federált tanítási kör")
-        #plt.ylabel(f"F1 érték")
         plt.legend()
         plt.grid(True, linestyle='--', alpha=0.6)
         plt.margins(0)

@@ -1,10 +1,6 @@
-from os.path import join as path
-import json, math
-import matplotlib.pyplot as plt
-import seaborn as sns
+import json
 import pandas as pd
-import numpy as np
-import os
+from os.path import join as path
 
 
 class Configuration:
@@ -12,7 +8,7 @@ class Configuration:
         self._random_state = 123
         
         ### Folder structure ###
-        self._path_home = None 
+        self._path_home = None # CHANGE ME to your root folder (FL-QUIC-TC)path.
         self._path_datasets = path(self.path_home, "datasets")
         self._path_results = path(self.path_home, "results")
         
