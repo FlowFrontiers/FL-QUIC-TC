@@ -1,19 +1,13 @@
-import sys, os, time
+import time, torch, copy
 import pandas as pd
 
 from os.path import join as path
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../../")))
 from configuration import Configuration
 from flwr.client import NumPyClient
-import torch
 from torch import nn
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 from torch.utils.data import DataLoader, Dataset
 from collections import OrderedDict
-import copy
-
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 def set_parameters(model, parameters):
     params_dict = zip(model.state_dict().keys(), parameters)
@@ -115,6 +109,7 @@ class FederatedClient(NumPyClient):
             train_loss += train_loss/len(dl_train)
             train_acc += correct_train/total_train
             
+            # Track validation metrics and best model
             val_metric_loss, val_metric_acc, val_metric_precision, val_metric_recall, val_metric_f1 = self._validate(dl_val)
             if val_metric_loss < best_val_loss:
                 best_val_loss = val_metric_loss
@@ -129,6 +124,7 @@ class FederatedClient(NumPyClient):
         train_time /= self.epochs
         train_acc /= self.epochs
         
+        # global model is better than local model
         if best_val_loss_epoch == 0:
             raise Exception("No validation loss improvement in client {}".format(self.client_id))
         
@@ -220,17 +216,16 @@ class FederatedClient(NumPyClient):
         
         return val_metric_loss, val_metric_acc, val_metric_precision, val_metric_recall, val_metric_f1
     
+    # Can throw an exception in case if chunk is missing. I don't handle this exception, instead use it as a signal to the server, which will
+    # count the client as failed and leaves it out of the training.
     def _load_data(self, dataset, server_run):
         df = pd.read_parquet(path(self.c.path_dataset, "5-federated", self.distribution_case, f"client-{self.client_id}", f"{dataset}-chunk-{server_run}.parquet"), columns=self.columns)
         X, y = df.drop(columns=self.c.appl), df[self.c.app]
         ds = FQDataset(X, y)
         return DataLoader(ds, batch_size=self.batch_size, shuffle= True if dataset=="train" else False)
         
-    
     def _load_train_data(self, server_run):
-        
         return self._load_data("train", server_run), self._load_data("validation", server_run)
     
     def _load_test_data(self, server_run):
-
         return self._load_data("test", server_run)
